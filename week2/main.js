@@ -27,3 +27,39 @@ const msg = item ?
 alert(msg);
 
 // 아래에 getItemByAmount 함수를 작성하세요.
+function getItemByAmount(data, amount){
+    // 상품데이터 가격 기준 올림차순 변경 후(높은 가격부터 for loop 돌기 위함)
+    data.sort((a,b) => {
+        if (a.price < b.price) { 
+            return 1;
+        }
+        if (a.price > b.price) {
+            return -1; 
+        }
+        return 0;
+
+    });
+    
+    // Item 클래스 생성
+    class Item{
+        constructor(name, price){
+            this.name = name;
+            this.price = price;
+        }
+    }
+
+    let high_priced = new Item()
+
+    // 조건이 맞으면 loop 나가고 가장 비싼 상품 저장
+    data.some(data => {
+        // console.log(data.price)
+        if (amount >= data.price){
+            console.log("if안:", amount, data.price)
+            high_priced = new Item(data.name, data.price) 
+            return true;
+        }
+    });
+    
+    return high_priced
+    
+}
