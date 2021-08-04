@@ -28,7 +28,7 @@ alert(msg);
 
 // 아래에 getItemByAmount 함수를 작성하세요.
 function getItemByAmount(data, amount){
-    // 상품데이터 가격 기준 올림차순 변경 후(높은 가격부터 for loop 돌기 위함)
+    // 상품데이터 가격 기준 올림차순 변경 후(높은 가격부터 loop 돌기 위함)
     data.sort((a,b) => {
         if (a.price < b.price) { 
             return 1;
@@ -52,14 +52,16 @@ function getItemByAmount(data, amount){
 
     // 조건이 맞으면 loop 나가고 가장 비싼 상품 저장
     data.some(data => {
-        // console.log(data.price)
         if (amount >= data.price){
-            console.log("if안:", amount, data.price)
             high_priced = new Item(data.name, data.price) 
             return true;
         }
     });
-    
+
+    // 값이 없으면 return 값이 없음
+    if (!high_priced.name){
+        return;
+    }
     return high_priced
     
 }
