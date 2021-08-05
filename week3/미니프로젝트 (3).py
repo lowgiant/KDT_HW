@@ -25,12 +25,13 @@
 '''
 
 from NaverNewsCrawler import NaverNewsCrawler
-
+keyword = input('수집할 기사 키워드 검색: ')
 ####사용자로 부터 기사 수집을 원하는 키워드를 input을 이용해 입력받아 ? 부분에 넣으세요
-crawler = NaverNewsCrawler(?)
+crawler = NaverNewsCrawler(keyword)
 
 #### 수집한 데이터를 저장할 엑셀 파일명을 input을 이용해 입력받아 ? 부분에 넣으세요
-crawler.get_news(?)
+excel_filename = f"{input('저장할 엑셀 파일명(확장자X): ')}.xlsx"
+crawler.get_news(excel_filename)
 
 #### 아래코드를 실행해 이메일 발송 기능에 필요한 모듈을 임포트하세요.
 from email.mime.text import MIMEText
@@ -41,8 +42,8 @@ import re
 #### gmail 발송 기능에 필요한 계정 정보를 아래 코드에 입력하세요.
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 465
-SMTP_USER = ''
-SMTP_PASSWORD = ''
+SMTP_USER = input('구글 아이디: ')
+SMTP_PASSWORD = input('구글 비밀번호: ')
 
 #### 아래 코드를 실행해 메일 발송에 필요한 send_mail 함수를 만드세요.
 def send_mail(name, addr, subject, contents, attachment=None):
@@ -71,7 +72,8 @@ def send_mail(name, addr, subject, contents, attachment=None):
 
         import os
         filename = os.path.basename(attachment)
-        file_data.add_header('Content-Disposition', 'attachment; filename="' + filename + '"')
+        # 엑셀 한글 파일명도 가능하도록 수정
+        file_data.add_header('Content-Disposition', 'attachment', filename=filename)
         msg.attach(file_data)
 
     smtp = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
@@ -79,11 +81,38 @@ def send_mail(name, addr, subject, contents, attachment=None):
     smtp.sendmail(SMTP_USER, addr, msg.as_string())
     smtp.close()
 
-#### 프로젝트 폴더에 있는 email_list.xlsx 파일에 이메일 받을 사람들의 정보를 입력하세요.
 
+#### 프로젝트 폴더에 있는 email_list.xlsx 파일에 이메일 받을 사람들의 정보를 입력하세요.
+from openpyxl import Workbook
+
+wb = Workbook()
+ws = wb.active
+
+
+people_count = 0
+
+def email_list_people_add(name, email):
+    global people_count 
+    people_count += 1 
+    ws[f'A{str(people_count)}'] = name
+    ws[f'B{str(people_count)}'] = email
+
+email_list_people_add('hsy', 'lowgiant@gmail.com')
+email_list_people_add('hsy', 'newreview@naver.com')
+
+wb.save('email_list.xlsx')
 
 #### 엑셀 파일의 정보를 읽어올 수 있는 모듈을 import하세요.
+from openpyxl import load_workbook
 
 
 #### email_list.xlsx 파일을 읽어와 해당 사람들에게 수집한 뉴스 정보 엑셀 파일을 send_mail 함수를 이용해 전송하세요.
-send_mail()
+wb = load_workbook('email_list.xlsx', read_only=True)
+data = wb.active
+
+subjects = f'{keyword}의 뉴스 입니다.'
+contents = f'{keyword}에 대한 최근 뉴스 제목과 URL 내용을 첨부 파일로 보내드립니다.'
+
+# 이메일 리스트에서 한명씩 메일 보냄
+for row in data.iter_rows():    
+    send_mail(row[0].value, row[1].value, subjects, contents, excel_filename)
