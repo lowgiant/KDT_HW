@@ -1,4 +1,4 @@
-# Product recommendation program by price
+# Sending Naver articles by email
 
 ## Prequisite
 - deadline: 21/08/6
