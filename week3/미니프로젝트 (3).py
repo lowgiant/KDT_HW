@@ -41,9 +41,10 @@ crawler = NaverNewsCrawler(keyword)
 #### 수집한 데이터를 저장할 엑셀 파일명을 input을 이용해 입력받아 ? 부분에 넣으세요
 excel_input_filename = input('저장할 엑셀 파일명(확장자X): ')
 if excel_input_filename.count('.') > 1:
-    excel_filename = ".".join(excel_input_filename.split('.')[0:excel_input_filename.count('.')])
+    excel_input_filename = ".".join(excel_input_filename.split('.')[0:excel_input_filename.count('.')])
+    excel_filename = f'{excel_input_filename}.xlsx'
 else:
-    excel_filename = excel_input_filename
+    excel_filename = f'{excel_input_filename}.xlsx'
 
 crawler.get_news(excel_filename)
 
