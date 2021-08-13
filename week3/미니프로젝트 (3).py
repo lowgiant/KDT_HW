@@ -24,26 +24,38 @@
 !pip install beautifulsoup4
 '''
 
+#### 아래코드를 실행해 이메일 발송 기능에 필요한 모듈을 임포트하세요.
+import email
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
+import re
+import json
+from openpyxl import Workbook, load_workbook
 from NaverNewsCrawler import NaverNewsCrawler
+
 keyword = input('수집할 기사 키워드 검색: ')
 ####사용자로 부터 기사 수집을 원하는 키워드를 input을 이용해 입력받아 ? 부분에 넣으세요
 crawler = NaverNewsCrawler(keyword)
 
 #### 수집한 데이터를 저장할 엑셀 파일명을 input을 이용해 입력받아 ? 부분에 넣으세요
-excel_filename = f"{input('저장할 엑셀 파일명(확장자X): ')}.xlsx"
+excel_input_filename = input('저장할 엑셀 파일명(확장자X): ')
+if excel_input_filename.count('.') > 1:
+    excel_filename = ".".join(excel_input_filename.split('.')[0:excel_input_filename.count('.')])
+else:
+    excel_filename = excel_input_filename
+
 crawler.get_news(excel_filename)
 
-#### 아래코드를 실행해 이메일 발송 기능에 필요한 모듈을 임포트하세요.
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import smtplib
-import re
-
 #### gmail 발송 기능에 필요한 계정 정보를 아래 코드에 입력하세요.
+with open('conf.json') as account_json:
+    account_json = json.load(account_json)
+
+
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 465
-SMTP_USER = input('구글 아이디: ')
-SMTP_PASSWORD = input('구글 비밀번호: ')
+SMTP_USER = account_json['email']
+SMTP_PASSWORD = account_json['password']
 
 #### 아래 코드를 실행해 메일 발송에 필요한 send_mail 함수를 만드세요.
 def send_mail(name, addr, subject, contents, attachment=None):
@@ -83,11 +95,8 @@ def send_mail(name, addr, subject, contents, attachment=None):
 
 
 #### 프로젝트 폴더에 있는 email_list.xlsx 파일에 이메일 받을 사람들의 정보를 입력하세요.
-from openpyxl import Workbook
-
 wb = Workbook()
 ws = wb.active
-
 
 people_count = 0
 
@@ -103,8 +112,6 @@ email_list_people_add('hsy', 'newreview@naver.com')
 wb.save('email_list.xlsx')
 
 #### 엑셀 파일의 정보를 읽어올 수 있는 모듈을 import하세요.
-from openpyxl import load_workbook
-
 
 #### email_list.xlsx 파일을 읽어와 해당 사람들에게 수집한 뉴스 정보 엑셀 파일을 send_mail 함수를 이용해 전송하세요.
 wb = load_workbook('email_list.xlsx', read_only=True)
